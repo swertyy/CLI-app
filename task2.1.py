@@ -15,21 +15,35 @@ def validate_filename(filename):
     global errors
     if not filename.strip():
         errors.append("Имя файла не может быть пустым.")
-        
-        max_length = 255
-        if len(filename) > max_length:
-            errors.append("Имя файла слишком длинное.")
-        
-        invalid_chars = ['\\', '/', ':', '*', '?', '"', '<', '>', '|']
-        for char in invalid_chars:
-            if char in filename:
-                errors.append(f"Имя файла содержит запрещённый символ {char}.")
 
-        reserved_names = {'CON', 'PRN', 'AUX', 'NUL',
-                         'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9',
-                         'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9'}
-        name = filename.split('.')[0].upper()
-        if name in reserved_names:
+    max_length = 255
+    if len(filename) > max_length:
+        errors.append("Имя файла слишком длинное.")
+
+    if not (((filename.find('\\') == filename.find(':')+1) or (filename.find('/') == filename.find(':')+1)) and filename.count(':') == 1):
+        errors.append("Недопустимо как имя файла.")
+
+    invalid_chars = ['*', '?', '"', '<', '>', '|']
+    for char in invalid_chars:
+        if char in filename:
+            errors.append(f"Имя файла содержит запрещённый символ {char}.")
+
+    reserved_names = {'CON', 'PRN', 'AUX', 'NUL',
+                      'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9',
+                      'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9'}
+
+    if '/' in filename and '\\' in filename:
+        errors.append("Неправильное имя файла")
+    if '/' in filename:
+        name = filename.split('/')
+    else:
+        name = filename.split('\\')
+
+    name[0] = name[0][:-1]
+    name[-1] = name[-1][:name[-1].find('.')]
+
+    for i in name:
+        if i.upper() in reserved_names:
             errors.append("Недопустимо как имя файла.")
 
 def validate_url(url):
